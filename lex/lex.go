@@ -1,47 +1,45 @@
 package lex
 
-//go:generate stringer -type Type
-
 import (
 	"fmt"
 	"io"
-	"log"
 
 	"github.com/domluna/brainfuck-go/config"
 )
 
-// Token represents a tokenized string.
-type Token struct {
-	Type Type
-	Text string
-	Line int
-	Pos  int
-}
-
+//go:generate stringer -type=Type
 type Type int
 
 const (
-	EOF   Type = iota // zero value
-	Error             // error occured during reading
-	Newline
+	EOF    Type = iota // zero value
+	Ignore             //
+	NewLine
 	IncTape   // '>' increment tape position
 	DecTape   // '<' increment tape position
 	IncByte   // '+' increment byte value at tape position
 	DecByte   // '-' decrement byte value at tape position
-	ReadByte  // '.' read the byte at tape position
-	StoreByte // ',' store the byte at tape position
-	StartLoop // '['
-	EndLoop   // ']'
+	WriteByte // '.' output byte at tape position
+	StoreByte // ',' read byte into and store tape position
+	LoopEnter // '['
+	LoopExit  // ']'
 )
+
+// Token represents a tokenized byte.
+type Token struct {
+	Type    Type
+	Line    int
+	Pos     int
+	ByteVal byte
+}
 
 func (t Token) String() string {
 	switch t.Type {
 	case EOF:
 		return "EOF"
-	case ERROR:
-		return fmt.Sprintf("ERROR: %s", t.Text)
+	case Ignore:
+		return fmt.Sprintf("Ignore: %q", t.ByteVal)
 	}
-	return fmt.Sprintf("%s: %q", t.Type, t.Text)
+	return fmt.Sprintf("%s: %q", t.Type, t.ByteVal)
 }
 
 const eof = -1
@@ -51,33 +49,34 @@ type stateFn func(*Lexer) stateFn
 // Lexer reads an input byte stream and generates
 // Brainfuck Tokens.
 type Lexer struct {
-	Tokens chan Token     // lexed tokens
-	r      io.ByteReader  // input stream
-	conf   *config.Config //
-	name   string         // name of file being lexed
-	line   int            // line number
-	pos    int            // position in the line
-	input  string         // current character
-	done   bool
-	state  stateFn
+	Tokens   chan Token     // lexed tokens
+	r        io.ByteReader  // input stream
+	conf     *config.Config //
+	fileName string         // name of file being lexed
+	lineNo   int            // line number
+	pos      int            // position in the line
+	input    byte           // current character
+	done     bool
+	state    stateFn
 }
 
 // New creates a Lexer. The Lexer reads from r and outputs
 // Token values to its channel Tokens.
-func New(name string, conf *config.Config, r io.ByteReader) *Lexer {
+func New(fileName string, c *config.Config, r io.ByteReader) *Lexer {
 	l := &Lexer{
-		Tokens: make(chan Token),
-		r:      r,
-		line:   1,
-		pos:    1,
-		name:   name,
+		Tokens:   make(chan Token),
+		conf:     c,
+		r:        r,
+		lineNo:   1,
+		pos:      0,
+		fileName: fileName,
 	}
 	go l.run()
 	return l
 }
 
 func (l *Lexer) run() {
-	for l.state = lexMain(l); l.state != nil; {
+	for l.state = lexMain; l.state != nil; {
 		l.state = l.state(l)
 	}
 	close(l.Tokens)
@@ -85,33 +84,32 @@ func (l *Lexer) run() {
 
 func (l *Lexer) next() rune {
 	c, err := l.r.ReadByte()
+
 	if err != nil { // EOF
 		l.done = true
 		return eof
 	}
 
-	l.input = string(c)
+	l.input = c
 	l.pos++
 	return rune(c)
 }
 
 // send the Token for Type t through the Token channel.
 func (l *Lexer) send(t Type) {
-	if t == Newline {
-		l.line++
+	if t == NewLine {
+		l.lineNo++
 		l.pos = 1
 	}
 
 	tok := Token{
-		Type: t,
-		Text: l.input,
-		Line: t.line,
-		Pos:  t.pos,
+		Type:    t,
+		ByteVal: l.input,
+		Line:    l.lineNo,
+		Pos:     l.pos,
 	}
 
-	if l.conf.Debug() {
-		log.Printf("%s %d:%d sending: %s\n", l.name, l.line, l.pos, tok)
-	}
+	l.conf.Debug("lex: <%q %d:%d> sending: %s\n", l.fileName, l.lineNo, l.pos, tok)
 
 	l.Tokens <- tok
 }
@@ -122,7 +120,7 @@ func (l *Lexer) send(t Type) {
 // more states, but in a more complicated language we would
 // want to return different states here.
 func lexMain(l *Lexer) stateFn {
-	r := l.read()
+	r := l.next()
 	switch r {
 	case eof: // This will terminate the loop in l.run()
 		return nil
@@ -137,15 +135,16 @@ func lexMain(l *Lexer) stateFn {
 	case '-':
 		l.send(DecByte)
 	case '.':
-		l.send(ReadByte)
+		l.send(WriteByte)
 	case ',':
 		l.send(StoreByte)
 	case '[':
-		l.send(StartLoop)
+		l.send(LoopEnter)
 	case ']':
-		l.send(EndLoop)
-	default: // ERROR
-		l.send(ERROR)
+		l.send(LoopExit)
+	// ignore all other cases
+	default:
+		l.send(Ignore)
 	}
 
 	return lexMain
