@@ -11,8 +11,7 @@ import (
 type Type int
 
 const (
-	EOF    Type = iota // zero value
-	Ignore             //
+	EOF Type = iota // zero value
 	NewLine
 	IncTape   // '>' increment tape position
 	DecTape   // '<' increment tape position
@@ -36,8 +35,6 @@ func (t Token) String() string {
 	switch t.Type {
 	case EOF:
 		return "EOF"
-	case Ignore:
-		return fmt.Sprintf("Ignore: %q", t.ByteVal)
 	}
 	return fmt.Sprintf("%s: %q", t.Type, t.ByteVal)
 }
@@ -73,6 +70,16 @@ func New(fileName string, c *config.Config, r io.ByteReader) *Lexer {
 	}
 	go l.run()
 	return l
+}
+
+// Pos returns the line position of the lexer.
+func (l *Lexer) Pos() int {
+	return l.pos
+}
+
+// Line returns the line number the lexer is on.
+func (l *Lexer) Line() int {
+	return l.lineNo
 }
 
 func (l *Lexer) run() {
@@ -142,9 +149,6 @@ func lexMain(l *Lexer) stateFn {
 		l.send(LoopEnter)
 	case ']':
 		l.send(LoopExit)
-	// ignore all other cases
-	default:
-		l.send(Ignore)
 	}
 
 	return lexMain

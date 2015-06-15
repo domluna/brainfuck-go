@@ -17,8 +17,7 @@ var tests = []struct {
 	},
 	{
 		"+\nabcd\n-",
-		[]Type{IncByte, NewLine, Ignore, Ignore, Ignore, Ignore,
-			NewLine, DecByte},
+		[]Type{IncByte, NewLine, NewLine, DecByte},
 	},
 }
 

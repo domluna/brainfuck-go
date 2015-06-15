@@ -32,14 +32,16 @@ func New(fileName string, c *config.Config, l *lex.Lexer) *Parser {
 // next returns the next token
 func (p *Parser) next() lex.Token {
 	tok := <-p.lexer.Tokens
+	for tok.Type == lex.NewLine {
+		// inc newline
+		tok = <-p.lexer.Tokens
+	}
 	p.currTok = tok
 	return tok
 }
 
 func (p *Parser) nextInst(tok lex.Token) program.Instruction {
 	switch tok.Type {
-	case lex.Ignore:
-		// noop
 	case lex.IncTape:
 		return program.InstMoveHead{1}
 	case lex.DecTape:
@@ -61,7 +63,6 @@ func (p *Parser) nextInst(tok lex.Token) program.Instruction {
 }
 
 func (p *Parser) parseLoop() program.Instruction {
-	loop := program.InstLoop{}
 	insts := make([]program.Instruction, 0)
 	for tok := p.next(); tok.Type != lex.EOF; tok = p.next() {
 		i := p.nextInst(tok)
@@ -70,12 +71,14 @@ func (p *Parser) parseLoop() program.Instruction {
 		}
 		insts = append(insts, i)
 	}
-	return loop
+	return program.InstLoop{insts}
 }
 
 func (p *Parser) Parse() (*program.Program, error) {
 	for tok := p.next(); tok.Type != lex.EOF; tok = p.next() {
 		i := p.nextInst(tok)
+		// p.conf.Debug("parse: <%s %d:%d> adding Instruction: %s\n", p.fileName,
+		// p.lexer.Line(), p.lexer.Pos(), i)
 		p.prog.AddInst(i)
 	}
 	return p.prog, p.err

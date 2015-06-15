@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"flag"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -25,12 +26,13 @@ func usage() {
 func main() {
 	flag.Parse()
 
-	if *verbose {
-		conf = config.New(true)
-	}
+	// if *verbose {
+	// 	conf = config.New(true)
+	// }
+	// conf = config.New(true)
 
 	if flag.NArg() > 0 {
-		name := flag.Arg(1)
+		name := flag.Arg(0)
 
 		var file io.Reader
 		var err error
@@ -48,6 +50,9 @@ func main() {
 			log.Fatalf("brainfuck: %s\n", err)
 		}
 
-		prog.Run()
+		fmt.Println("done reading program")
+		result := prog.Run()
+		fmt.Println("done running program")
+		fmt.Fprintf(os.Stdout, "%s", result)
 	}
 }

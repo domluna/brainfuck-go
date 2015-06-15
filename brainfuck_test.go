@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 
@@ -10,6 +9,10 @@ import (
 	"github.com/domluna/brainfuck-go/parse"
 )
 
+const helloWorldProg = `
+++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.
+`
+
 var tests = []struct {
 	name string
 	in   string
@@ -17,8 +20,8 @@ var tests = []struct {
 }{
 	{
 		"hello_world.b",
-		"++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.",
-		"Hello world!\n",
+		helloWorldProg,
+		"Hello World!\n",
 	},
 }
 
@@ -35,11 +38,9 @@ func TestBrainfuck(t *testing.T) {
 			t.Fatalf("expected <nil>, got %q", err)
 		}
 
-		buf := prog.Run()
-		fmt.Println(buf)
-
-		if string(buf) != tt.out {
-			t.Errorf("expected %s, got %s", tt.out, string(buf))
+		result := prog.Run()
+		if string(result) != tt.out {
+			t.Errorf("expected %s, got %s", tt.out, string(result))
 		}
 
 	}

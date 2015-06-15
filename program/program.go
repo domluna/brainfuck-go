@@ -6,7 +6,11 @@
 // Instructions are evaluated on a Tape.
 package program
 
-import "github.com/domluna/brainfuck-go/config"
+import (
+	"fmt"
+
+	"github.com/domluna/brainfuck-go/config"
+)
 
 type Program struct {
 	insts []Instruction
@@ -20,6 +24,14 @@ func NewProgram(t Tape, c *config.Config) *Program {
 		t:     t,
 		conf:  c,
 	}
+}
+
+func (p *Program) String() string {
+	s := ""
+	for _, i := range p.insts {
+		s += fmt.Sprintf("%s\n", i)
+	}
+	return s
 }
 
 // AddInst adds i to the program Instruction list.

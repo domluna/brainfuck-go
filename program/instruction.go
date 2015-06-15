@@ -65,26 +65,29 @@ type InstLoop struct {
 }
 
 func (i InstLoop) String() string {
-	s := "InstLoop\n"
+	s := "InstLoop START\n"
 	for _, ii := range i.Insts {
-		s += fmt.Sprintf("  %s\n", ii)
+		s += fmt.Sprintf("%s\n", ii.String())
 	}
+	s += "InstLoop END"
 	return s
 }
 
 func (i InstLoop) Eval(t Tape) {
-	headStart := t.GetHead()
 	for {
+		// loop exit condition
+		if t.GetByte() == byte(0) {
+			return
+		}
+
 		for _, ii := range i.Insts {
 			ii.Eval(t)
 		}
 
 		// loop exit condition
-		if t.GetByte() != byte(0) {
+		if t.GetByte() == byte(0) {
 			return
 		}
 
-		// Reset tape head
-		t.SetHead(headStart)
 	}
 }
