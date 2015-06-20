@@ -8,6 +8,7 @@ package program
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/domluna/brainfuck-go/config"
 )
@@ -42,11 +43,10 @@ func (p *Program) AddInst(i Instruction) {
 }
 
 // Run evaluates the Program's instructions.
-func (p *Program) Run() []byte {
+func (p *Program) Run(in io.ByteReader, out io.ByteWriter) {
 	for _, i := range p.insts {
-		i.Eval(p.t)
+		i.Eval(p.t, in, out)
 	}
-	return p.t.Output()
 }
 
 // TODO:

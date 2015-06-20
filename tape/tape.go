@@ -1,19 +1,14 @@
 package tape
 
-import "bytes"
-
 type Tape struct {
 	head int // position of the head in the tape
 	tape []byte
-	buf  bytes.Buffer
 }
 
 func New() *Tape {
-	var b bytes.Buffer
 	return &Tape{
 		head: 0,
 		tape: make([]byte, 1),
-		buf:  b,
 	}
 }
 
@@ -44,13 +39,6 @@ func (t *Tape) AddToByte(i int) {
 	t.tape[t.head] = byte((int(cb) + i) % 256)
 }
 
-// WriteByte writes the byte at the tape head
-// to Tape's io.ByteWriter.
-func (t *Tape) WriteByte() {
-	b := t.GetByte()
-	t.buf.WriteByte(b)
-}
-
 // GetByte returns value of the byte at the tape head.
 func (t *Tape) GetByte() byte {
 	b := t.tape[t.head]
@@ -73,8 +61,4 @@ func (t *Tape) SetHead(i int) {
 		panic("tape: cannot set head to negative index")
 	}
 	t.head = i
-}
-
-func (t *Tape) Output() []byte {
-	return t.buf.Bytes()
 }

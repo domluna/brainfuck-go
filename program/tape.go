@@ -11,11 +11,6 @@ type Tape interface {
 	// This should deal with over/under flows by wrapping.
 	AddToByte(i int)
 
-	// Write the byte at the tape head to some output.
-	// The output can be Stdout or a buffer, such as
-	// bytes.Buffer.
-	WriteByte()
-
 	// Set the byte at the tape head to b.
 	SetByte(b byte)
 
@@ -27,9 +22,4 @@ type Tape interface {
 
 	// Set the position of the tape head to i.
 	SetHead(i int)
-
-	// Returns the bytes written to the buffer.
-	// If stdout is being used for output, nil
-	// is returned.
-	Output() []byte
 }

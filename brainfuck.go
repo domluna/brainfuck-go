@@ -50,9 +50,12 @@ func main() {
 			log.Fatalf("brainfuck: %s\n", err)
 		}
 
-		fmt.Println("done reading program")
-		result := prog.Run()
-		fmt.Println("done running program")
-		fmt.Fprintf(os.Stdout, "%s", result)
+		in := bufio.NewReader(os.Stdin)
+		// out := new(bytes.Buffer)
+		out := bufio.NewWriter(os.Stdout)
+		// fmt.Println("done reading program")
+		prog.Run(in, out)
+		fmt.Printf("%q", out)
+		// fmt.Println("done running program")
 	}
 }

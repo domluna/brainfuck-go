@@ -13,12 +13,12 @@ type Type int
 const (
 	EOF Type = iota // zero value
 	NewLine
-	IncTape   // '>' increment tape position
-	DecTape   // '<' increment tape position
-	IncByte   // '+' increment byte value at tape position
-	DecByte   // '-' decrement byte value at tape position
-	WriteByte // '.' output byte at tape position
-	StoreByte // ',' read byte into and store tape position
+	IncTape   // '>' increment tape head
+	DecTape   // '<' decrement tape head
+	IncByte   // '+' increment byte value at tape head
+	DecByte   // '-' decrement byte value at tape head
+	WriteByte // '.' write byte to output
+	StoreByte // ',' store byte from input to tape header
 	LoopEnter // '['
 	LoopExit  // ']'
 )

@@ -1,10 +1,13 @@
 package program
 
-import "fmt"
+import (
+	"fmt"
+	"io"
+)
 
 type Instruction interface {
 	// Evaluate the instruction on the Tape.
-	Eval(Tape)
+	Eval(t Tape, in io.ByteReader, out io.ByteWriter)
 
 	// String representation of the instruction.
 	String() string
@@ -18,50 +21,72 @@ type InstMoveHead struct {
 	V int
 }
 
-func (i InstMoveHead) String() string {
-	return fmt.Sprintf("InstMoveHead %d", i.V)
+func (i InstMoveHead) Eval(t Tape, in io.ByteReader, out io.ByteWriter) {
+	t.MoveHead(i.V)
 }
 
-func (i InstMoveHead) Eval(t Tape) {
-	t.MoveHead(i.V)
+func (i InstMoveHead) String() string {
+	return fmt.Sprintf("InstMoveHead %d", i.V)
 }
 
 type InstAddToByte struct {
 	V int
 }
 
+func (i InstAddToByte) Eval(t Tape, in io.ByteReader, out io.ByteWriter) {
+	t.AddToByte(i.V)
+}
+
 func (i InstAddToByte) String() string {
 	return fmt.Sprintf("InstAddToByte %d", i.V)
 }
 
-func (i InstAddToByte) Eval(t Tape) {
-	t.AddToByte(i.V)
+type InstWriteToOutput struct{}
+
+func (i InstWriteToOutput) Eval(t Tape, input io.ByteReader, out io.ByteWriter) {
+	b := t.GetByte()
+	out.WriteByte(b)
 }
 
-type InstWriteByte struct{}
-
-func (i InstWriteByte) String() string {
-	return fmt.Sprintf("InstWriteByte")
+func (i InstWriteToOutput) String() string {
+	return "InstWriteToOutput"
 }
 
-func (i InstWriteByte) Eval(t Tape) {
-	t.WriteByte()
+type InstReadFromInput struct{}
+
+func (i InstReadFromInput) Eval(t Tape, in io.ByteReader, out io.ByteWriter) {
+	b, _ := in.ReadByte()
+	if b == byte(0) {
+		return
+	}
+	t.SetByte(b)
 }
 
-type InstSetByte struct {
-	B byte
-}
-
-func (i InstSetByte) String() string {
-	return fmt.Sprintf("InstSetByte %q, %v", i.B, i.B)
-}
-
-func (i InstSetByte) Eval(t Tape) {
-	t.SetByte(i.B)
+func (i InstReadFromInput) String() string {
+	return "InstReadFromInput"
 }
 
 type InstLoop struct {
 	Insts []Instruction
+}
+
+func (i InstLoop) Eval(t Tape, in io.ByteReader, out io.ByteWriter) {
+	for {
+		// loop exit condition
+		if t.GetByte() == byte(0) {
+			break
+		}
+
+		for _, ii := range i.Insts {
+			ii.Eval(t, in, out)
+		}
+
+		// loop exit condition
+		if t.GetByte() == byte(0) {
+			break
+		}
+
+	}
 }
 
 func (i InstLoop) String() string {
@@ -71,23 +96,4 @@ func (i InstLoop) String() string {
 	}
 	s += "InstLoop END"
 	return s
-}
-
-func (i InstLoop) Eval(t Tape) {
-	for {
-		// loop exit condition
-		if t.GetByte() == byte(0) {
-			return
-		}
-
-		for _, ii := range i.Insts {
-			ii.Eval(t)
-		}
-
-		// loop exit condition
-		if t.GetByte() == byte(0) {
-			return
-		}
-
-	}
 }
