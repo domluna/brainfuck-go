@@ -15,14 +15,12 @@ import (
 
 type Program struct {
 	insts []Instruction
-	t     Tape
 	conf  *config.Config
 }
 
-func NewProgram(t Tape, c *config.Config) *Program {
+func New(c *config.Config) *Program {
 	return &Program{
 		insts: make([]Instruction, 0),
-		t:     t,
 		conf:  c,
 	}
 }
@@ -43,14 +41,13 @@ func (p *Program) AddInst(i Instruction) {
 }
 
 // Run evaluates the Program's instructions.
-func (p *Program) Run(in io.ByteReader, out io.ByteWriter) {
+func (p *Program) Run(t Tape, in io.ByteReader, out io.ByteWriter) {
 	for _, i := range p.insts {
-		i.Eval(p.t, in, out)
+		i.Eval(t, in, out)
 	}
 }
 
-// TODO:
-// Compile compiles the Program to a standalone binary executable.
-func (p *Program) Compile() {
+// TODO: Compile compiles the Program to a standalone binary executable.
+func (p *Program) Compile(t Tape, in io.ByteReader, out io.ByteWriter) {
 	panic("program: compile not implemented")
 }

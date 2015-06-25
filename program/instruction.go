@@ -45,6 +45,8 @@ type InstWriteToOutput struct{}
 
 func (i InstWriteToOutput) Eval(t Tape, input io.ByteReader, out io.ByteWriter) {
 	b := t.GetByte()
+	// fmt.Fprint(out, b)
+	// out.Flush()
 	out.WriteByte(b)
 }
 

@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"flag"
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -11,6 +10,7 @@ import (
 	"github.com/domluna/brainfuck-go/config"
 	"github.com/domluna/brainfuck-go/lex"
 	"github.com/domluna/brainfuck-go/parse"
+	"github.com/domluna/brainfuck-go/tape"
 )
 
 var verbose = flag.Bool("verbose", false, "prints debug output")
@@ -19,6 +19,21 @@ var verbose = flag.Bool("verbose", false, "prints debug output")
 // `
 
 var conf *config.Config
+
+// Hack around *bufio.Writer for os.Stdout.
+// We call Flush after every write.
+//
+// Need this for interactive output and programs
+// like rot13 which take input and return an output.
+type byteWriterFlusher struct {
+	w *bufio.Writer
+}
+
+func (bw byteWriterFlusher) WriteByte(b byte) error {
+	err := bw.w.WriteByte(b)
+	bw.w.Flush()
+	return err
+}
 
 func usage() {
 }
@@ -44,18 +59,16 @@ func main() {
 
 		lexer := lex.New(name, conf, bufio.NewReader(file))
 		parser := parse.New(name, conf, lexer)
+		tape := tape.New()
 
 		prog, err := parser.Parse()
 		if err != nil {
-			log.Fatalf("brainfuck: %s\n", err)
+			log.Fatalf("brainfuck: error during parsing %s\n", err)
 		}
 
 		in := bufio.NewReader(os.Stdin)
-		// out := new(bytes.Buffer)
-		out := bufio.NewWriter(os.Stdout)
-		// fmt.Println("done reading program")
-		prog.Run(in, out)
-		fmt.Printf("%q", out)
-		// fmt.Println("done running program")
+		out := byteWriterFlusher{bufio.NewWriter(os.Stdout)}
+
+		prog.Run(tape, in, out)
 	}
 }

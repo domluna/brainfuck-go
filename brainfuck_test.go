@@ -9,6 +9,7 @@ import (
 	"github.com/domluna/brainfuck-go/config"
 	"github.com/domluna/brainfuck-go/lex"
 	"github.com/domluna/brainfuck-go/parse"
+	"github.com/domluna/brainfuck-go/tape"
 )
 
 const helloWorldProg = `
@@ -59,9 +60,10 @@ func Test_HelloWorld(t *testing.T) {
 	}
 
 	// not using input so it doesn't matter
+	tape := tape.New()
 	in := strings.NewReader("")
 	out := new(bytes.Buffer)
-	prog.Run(in, out)
+	prog.Run(tape, in, out)
 
 	expect := "Hello World!\n"
 	result := fmt.Sprintf("%s", out)
@@ -80,10 +82,11 @@ func Test_Rot13(t *testing.T) {
 		t.Fatalf("expected <nil>, got %q", err)
 	}
 
+	tape := tape.New()
 	in := strings.NewReader("I'm the batman!")
 	out := new(bytes.Buffer)
 
-	prog.Run(in, out)
+	prog.Run(tape, in, out)
 
 	expect := "V'z gur ongzna!"
 	result := fmt.Sprintf("%s", out)

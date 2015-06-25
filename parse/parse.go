@@ -5,7 +5,6 @@ import (
 	"github.com/domluna/brainfuck-go/config"
 	"github.com/domluna/brainfuck-go/lex"
 	"github.com/domluna/brainfuck-go/program"
-	"github.com/domluna/brainfuck-go/tape"
 )
 
 type Parser struct {
@@ -72,7 +71,7 @@ func (p *Parser) parseLoop() program.Instruction {
 }
 
 func (p *Parser) Parse() (*program.Program, error) {
-	prog := program.NewProgram(tape.New(), p.conf)
+	prog := program.New(p.conf)
 	for tok := p.next(); tok.Type != lex.EOF; tok = p.next() {
 		i := p.nextInst(tok)
 		// p.conf.Debug("parse: <%s %d:%d> adding Instruction: %s\n", p.fileName,
