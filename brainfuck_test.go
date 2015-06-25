@@ -63,7 +63,10 @@ func Test_HelloWorld(t *testing.T) {
 	tape := tape.New()
 	in := strings.NewReader("")
 	out := new(bytes.Buffer)
-	prog.Run(tape, in, out)
+
+	for _, i := range prog {
+		i.Eval(tape, in, out)
+	}
 
 	expect := "Hello World!\n"
 	result := fmt.Sprintf("%s", out)
@@ -86,7 +89,9 @@ func Test_Rot13(t *testing.T) {
 	in := strings.NewReader("I'm the batman!")
 	out := new(bytes.Buffer)
 
-	prog.Run(tape, in, out)
+	for _, i := range prog {
+		i.Eval(tape, in, out)
+	}
 
 	expect := "V'z gur ongzna!"
 	result := fmt.Sprintf("%s", out)

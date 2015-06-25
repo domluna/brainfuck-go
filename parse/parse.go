@@ -70,13 +70,14 @@ func (p *Parser) parseLoop() program.Instruction {
 	return program.InstLoop{insts}
 }
 
-func (p *Parser) Parse() (*program.Program, error) {
-	prog := program.New(p.conf)
+func (p *Parser) Parse() ([]program.Instruction, error) {
+	prog := make([]program.Instruction, 0)
 	for tok := p.next(); tok.Type != lex.EOF; tok = p.next() {
 		i := p.nextInst(tok)
 		// p.conf.Debug("parse: <%s %d:%d> adding Instruction: %s\n", p.fileName,
 		// p.lexer.Line(), p.lexer.Pos(), i)
-		prog.AddInst(i)
+		prog = append(prog, i)
+		// prog.AddInst(i)
 	}
 	return prog, p.err
 }
