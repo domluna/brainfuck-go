@@ -58,10 +58,7 @@ func main() {
 		lexer := lex.New(name, conf, bufio.NewReader(file))
 		parser := parse.New(name, conf, lexer)
 
-		prog, err := parser.Parse()
-		if err != nil {
-			log.Fatalf("brainfuck: parsing: %v", err)
-		}
+		prog := parser.Parse()
 
 		// optimize program
 		prog = program.Optimize(prog)

@@ -11,7 +11,10 @@ The goal from this was to learn a bit about how interpreters and compilers work.
 
 Steps of this process are kept in separate packages and serve as a decent blueprint for future, more complicated work.
 
-Link Rob Pike stuff
+Resources:
+
+[Lexical Scanning in Go](https://www.youtube.com/watch?v=HxaD_trXwRE)
+[Ivy, APL Interpreter](https://github.com/robpike/ivy)
 
 ### How it works
 

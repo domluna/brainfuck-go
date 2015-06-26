@@ -51,7 +51,3 @@ func Optimize(insts []Instruction) []Instruction {
 	}
 	return opted
 }
-
-// func merge(i1, i2 Instruction) Instruction {
-//
-// }

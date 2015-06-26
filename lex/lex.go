@@ -1,3 +1,7 @@
+// The structure of this lexer is derived from
+// Rob Pike's APL interpreter "ivy" (github.com/robpike/ivy).
+//
+// Check it out, it's awesome!
 package lex
 
 import (
@@ -10,6 +14,8 @@ import (
 //go:generate stringer -type=Type
 type Type int
 
+// EOF being the zero value has nice implications
+// for when we close our Token channel down the line.
 const (
 	EOF Type = iota // zero value
 	NewLine
@@ -59,6 +65,8 @@ type Lexer struct {
 
 // New creates a Lexer. The Lexer reads from r and outputs
 // Token values to its channel Tokens.
+//
+// The Lexer works concurrently.
 func New(fileName string, c *config.Config, r io.ByteReader) *Lexer {
 	l := &Lexer{
 		Tokens:   make(chan Token),
@@ -89,6 +97,8 @@ func (l *Lexer) run() {
 	close(l.Tokens)
 }
 
+// we return a rune here so we can use -1 as a value
+// byte ranges from 0..255
 func (l *Lexer) next() rune {
 	c, err := l.r.ReadByte()
 
@@ -102,7 +112,7 @@ func (l *Lexer) next() rune {
 	return rune(c)
 }
 
-// send the Token for Type t through the Token channel.
+// send the Token for Type t through the Tokens channel.
 func (l *Lexer) send(t Type) {
 	if t == NewLine {
 		l.lineNo++
@@ -117,7 +127,6 @@ func (l *Lexer) send(t Type) {
 	}
 
 	l.conf.Debug("lex: <%q %d:%d> sending: %s\n", l.fileName, l.lineNo, l.pos, tok)
-
 	l.Tokens <- tok
 }
 

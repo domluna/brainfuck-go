@@ -47,6 +47,7 @@ const rot13Prog = `
 ]                            End character reading loop
 `
 
+// only need Debug=true if we screw up and need to see what's going on
 var conf = config.New(false)
 
 func Test_HelloWorld(t *testing.T) {
@@ -54,10 +55,7 @@ func Test_HelloWorld(t *testing.T) {
 	lexer := lex.New("hello_world.b", conf, strings.NewReader(helloWorldProg))
 	parser := parse.New("hello_world.b", conf, lexer)
 
-	prog, err := parser.Parse()
-	if err != nil {
-		t.Fatalf("expected <nil>, got %q", err)
-	}
+	prog := parser.Parse()
 
 	var result string
 	var tp *tape.Tape
@@ -98,10 +96,7 @@ func Test_Rot13(t *testing.T) {
 	lexer := lex.New("rot13.b", conf, strings.NewReader(rot13Prog))
 	parser := parse.New("rot13.b", conf, lexer)
 
-	prog, err := parser.Parse()
-	if err != nil {
-		t.Fatalf("expected <nil>, got %q", err)
-	}
+	prog := parser.Parse()
 
 	var result string
 	var tp *tape.Tape
