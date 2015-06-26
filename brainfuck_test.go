@@ -2,13 +2,13 @@ package main_test
 
 import (
 	"bytes"
-	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/domluna/brainfuck-go/config"
 	"github.com/domluna/brainfuck-go/lex"
 	"github.com/domluna/brainfuck-go/parse"
+	"github.com/domluna/brainfuck-go/program"
 	"github.com/domluna/brainfuck-go/tape"
 )
 
@@ -59,19 +59,37 @@ func Test_HelloWorld(t *testing.T) {
 		t.Fatalf("expected <nil>, got %q", err)
 	}
 
-	// not using input so it doesn't matter
-	tt := tape.New()
-	in := strings.NewReader("")
-	out := new(bytes.Buffer)
+	var result string
+	var tp *tape.Tape
+	var in *strings.Reader
+	var out bytes.Buffer
 
-	for _, i := range prog {
-		i.Eval(tt, in, out)
-	}
+	tp = tape.New()
+	in = strings.NewReader("")
 
 	expect := "Hello World!\n"
-	result := fmt.Sprintf("%s", out)
+
+	for _, i := range prog {
+		i.Eval(tp, in, &out)
+	}
+
+	result = out.String()
 	if result != expect {
-		t.Errorf("expected %s, got %s", expect, result)
+		t.Errorf("normal program: expected %s, got %s", expect, result)
+	}
+
+	// reset
+	tp = tape.New()
+	in = strings.NewReader("")
+	out.Reset()
+
+	prog = program.Optimize(prog)
+	for _, i := range prog {
+		i.Eval(tp, in, &out)
+	}
+	result = out.String()
+	if result != expect {
+		t.Errorf("optimized program: expected %s, got %s", expect, result)
 	}
 
 }
@@ -85,18 +103,38 @@ func Test_Rot13(t *testing.T) {
 		t.Fatalf("expected <nil>, got %q", err)
 	}
 
-	tt := tape.New()
-	in := strings.NewReader("I'm the batman!")
-	out := new(bytes.Buffer)
-
-	for _, i := range prog {
-		i.Eval(tt, in, out)
-	}
+	var result string
+	var tp *tape.Tape
+	var in *strings.Reader
+	var out bytes.Buffer
 
 	expect := "V'z gur ongzna!"
-	result := fmt.Sprintf("%s", out)
+
+	tp = tape.New()
+	in = strings.NewReader("I'm the batman!")
+
+	for _, i := range prog {
+		i.Eval(tp, in, &out)
+	}
+
+	result = out.String()
 	if result != expect {
-		t.Errorf("expected %s, got %s", expect, result)
+		t.Errorf("normal program: expected %s, got %s", expect, result)
+	}
+
+	// reset
+	tp = tape.New()
+	in = strings.NewReader("I'm the batman!")
+	out.Reset()
+
+	prog = program.Optimize(prog)
+	for _, i := range prog {
+		i.Eval(tp, in, &out)
+	}
+
+	result = out.String()
+	if result != expect {
+		t.Errorf("optimized program: expected %s, got %s", expect, result)
 	}
 
 }

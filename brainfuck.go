@@ -14,6 +14,7 @@ import (
 	"github.com/domluna/brainfuck-go/config"
 	"github.com/domluna/brainfuck-go/lex"
 	"github.com/domluna/brainfuck-go/parse"
+	"github.com/domluna/brainfuck-go/program"
 	"github.com/domluna/brainfuck-go/tape"
 )
 
@@ -63,6 +64,7 @@ func main() {
 		}
 
 		// optimize program
+		prog = program.Optimize(prog)
 
 		// run program
 		t := tape.New()
@@ -72,5 +74,6 @@ func main() {
 			i.Eval(t, in, out)
 		}
 
+	} else {
 	}
 }

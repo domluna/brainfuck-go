@@ -63,6 +63,7 @@ func (p *Parser) parseLoop() program.Instruction {
 	for tok := p.next(); tok.Type != lex.EOF; tok = p.next() {
 		i := p.nextInst(tok)
 		if i == nil { // exit loop
+			// insts = append(insts, program.InstLoopEnd{})
 			break
 		}
 		insts = append(insts, i)

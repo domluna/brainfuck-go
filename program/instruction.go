@@ -90,10 +90,18 @@ func (i InstLoop) Eval(t Tape, in io.ByteReader, out io.ByteWriter) {
 }
 
 func (i InstLoop) String() string {
-	s := "InstLoop START\n"
+	s := "InstLoop\n"
 	for _, ii := range i.Insts {
 		s += fmt.Sprintf("%s\n", ii)
 	}
-	s += "InstLoop END"
 	return s
+}
+
+// InstLoopEnd is a noop instruction. It doesn't do anything it's
+// just here so we know when a loop scope ends.
+type InstLoopEnd struct{}
+
+func (i InstLoopEnd) Eval(t Tape, in io.ByteReader, out io.ByteWriter) {}
+func (i InstLoopEnd) String() string {
+	return "InstLoopEnd"
 }
