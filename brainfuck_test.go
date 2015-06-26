@@ -60,12 +60,12 @@ func Test_HelloWorld(t *testing.T) {
 	}
 
 	// not using input so it doesn't matter
-	tape := tape.New()
+	tt := tape.New()
 	in := strings.NewReader("")
 	out := new(bytes.Buffer)
 
 	for _, i := range prog {
-		i.Eval(tape, in, out)
+		i.Eval(tt, in, out)
 	}
 
 	expect := "Hello World!\n"
@@ -85,12 +85,12 @@ func Test_Rot13(t *testing.T) {
 		t.Fatalf("expected <nil>, got %q", err)
 	}
 
-	tape := tape.New()
+	tt := tape.New()
 	in := strings.NewReader("I'm the batman!")
 	out := new(bytes.Buffer)
 
 	for _, i := range prog {
-		i.Eval(tape, in, out)
+		i.Eval(tt, in, out)
 	}
 
 	expect := "V'z gur ongzna!"

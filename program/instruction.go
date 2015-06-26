@@ -26,7 +26,7 @@ func (i InstMoveHead) Eval(t Tape, in io.ByteReader, out io.ByteWriter) {
 }
 
 func (i InstMoveHead) String() string {
-	return fmt.Sprintf("InstMoveHead %d", i.V)
+	return fmt.Sprintf("InstMoveHead{%d}", i.V)
 }
 
 type InstAddToByte struct {
@@ -38,15 +38,13 @@ func (i InstAddToByte) Eval(t Tape, in io.ByteReader, out io.ByteWriter) {
 }
 
 func (i InstAddToByte) String() string {
-	return fmt.Sprintf("InstAddToByte %d", i.V)
+	return fmt.Sprintf("InstAddToByte{%d}", i.V)
 }
 
 type InstWriteToOutput struct{}
 
-func (i InstWriteToOutput) Eval(t Tape, input io.ByteReader, out io.ByteWriter) {
+func (i InstWriteToOutput) Eval(t Tape, in io.ByteReader, out io.ByteWriter) {
 	b := t.GetByte()
-	// fmt.Fprint(out, b)
-	// out.Flush()
 	out.WriteByte(b)
 }
 
@@ -94,7 +92,7 @@ func (i InstLoop) Eval(t Tape, in io.ByteReader, out io.ByteWriter) {
 func (i InstLoop) String() string {
 	s := "InstLoop START\n"
 	for _, ii := range i.Insts {
-		s += fmt.Sprintf("%s\n", ii.String())
+		s += fmt.Sprintf("%s\n", ii)
 	}
 	s += "InstLoop END"
 	return s

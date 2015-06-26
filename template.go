@@ -13,14 +13,17 @@ import (
 	"os"
 
 	"github.com/domluna/brainfuck-go/tape"
+	"github.com/domluna/brainfuck-go/program"
 )
 
 func main() {
-	tape := tape.New()
+	var b byte
+	t := tape.New()
 	in := bufio.NewReader(os.Stdin)
 	out := byteWriterFlusher{bufio.NewWriter(os.Stdout)}
-	{{range _, $inst := .Insts}}
-		$inst.Eval(tape, in, out)
+
+	{{range .Insts}}
+	{{ .Eval 1 2 3 }}
 	{{end}}
 }
 `))
