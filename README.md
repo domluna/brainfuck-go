@@ -1,36 +1,53 @@
 # Brainfuck-go
 
-Brainfuck interpreter/compiler in Go.
+Brainfuck compiler in Go - well not quite. A compiler outputs binaries. It's in
+between an interpreter and a compiler.
 
-How to deal with output?
+### Intro
 
-WriteByte will write the byte to some output.
-Should it be
+This is not the smallest possible implementation of a Brainfuck interpreter by any means. Nor it is the fastest. Those aren't the goals.
 
-WriteByte()
-or
-WriteByte(w io.ByteWriter)
-?
+The goal from this was to learn a bit about how interpreters and compilers work. Using Brainfuck looked to be the simplest way to achieve this. 
 
-Options:
+Steps of this process are kept in separate packages and serve as a decent blueprint for future, more complicated work.
 
-1. Add another argument to Eval(), like the Program. We could then add a field to the Program
-type and use WriteByte().
+Link Rob Pike stuff
 
-2. For WriteByte(io.ByteWriter) we make a field in the instruction. 
+### How it works
 
-3. Add a field to the type that implements Tape, and use WriteByte(), if we don't care
-this could also just print to stdout.
+1. lexer on *.b file
+2. parses tokens from lexer
+3. create list(AST in this context) of instructions from (2) 
+4. optimize instructions
+5. evalute instructions
+6. output result
 
-Which one?
+Steps 1-3 run concurrently.
 
-1. Problem here we add an extra argument but InstWriteByte would be the only instruction
-to make use of this. Not a good solution.
+### Usage
 
-2. Adding a field to the instruction might seem reasonable. But, we have to make sure
-the field is a pointer. Even still, we'd have hundreds or thousands of instructions that
-point to the same io.ByteWriter.
+Get it.
 
-3. Best option. We remove the output completely from the program package and let whoever is
-implementing the interface worry about it.
+```sh
+$ go get github.com/domluna/brainfuck-go
+```
+
+Use it.
+
+```sh
+$ brainfuck-go helloworld.b
+// Hello World!
+```
+
+### Optimizing the instructions
+
+Running `examples/mandelbrot.b` timings.
+
+```sh
+    without optimization -> 194.10 seconds
+    with    optimization -> 52.62  seconds
+```
+
+That's ~400% speed up. So it's fair to say the optimizations do a fair amount.
+
 
