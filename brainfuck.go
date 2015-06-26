@@ -7,6 +7,7 @@ package main
 import (
 	"bufio"
 	"flag"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -18,10 +19,10 @@ import (
 	"github.com/domluna/brainfuck-go/tape"
 )
 
+var conf = config.New(false)
+
 // var usage = `
 // `
-
-var conf *config.Config
 
 // Hack around *bufio.Writer for os.Stdout.
 // We call Flush after every write.
@@ -38,8 +39,12 @@ func (bw byteWriterFlusher) WriteByte(b byte) error {
 	return err
 }
 
-func usage() {
-}
+var usage = `Usage:
+
+brainfuck-go <file>
+
+Only takes 1 argument. All others are ignored.
+`
 
 func main() {
 	flag.Parse()
@@ -72,5 +77,6 @@ func main() {
 		}
 
 	} else {
+		fmt.Print(usage)
 	}
 }
